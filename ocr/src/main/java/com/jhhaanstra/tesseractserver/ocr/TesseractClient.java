@@ -68,7 +68,7 @@ public class TesseractClient {
     }
 
     private void restoreLanguageToDefault() {
-        instance.setLanguage(defaultLanguage);
+        changeLanguage(defaultLanguage);
     }
 
     private interface ThrowingSupplier<T> {
