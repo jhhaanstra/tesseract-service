@@ -9,7 +9,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Objects;
 
@@ -17,7 +20,7 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class TesseractServerTest {
+class TesseractClientTest {
 
     private static final Config CONFIG = ConfigFactory.load().getConfig("tesseract-server.ocr");
 
@@ -50,12 +53,31 @@ class TesseractServerTest {
         verify(CLIENT, times(1)).setLanguage("eng");
     }
 
+    /**
+     * Apparently bufferedImages seem to lower the quality of results. Should look into this replacing this.
+     */
+    @Test
+    void shouldHandleBufferedImages() throws IOException, TesseractException {
+        File file = getImage("images/piloot.png");
+        BufferedImage image = ImageIO.read(file);
+        shouldDoOCR(image, """
+                Rutherford is namelijk ook de jongste piloot die de viiegreis volbracht in een
+                zogeheten ultralicht viiegtuig. Dat is een Kiein, eenmotorig toestel. Het record
+                stond op naam van zijn drie jaar oudere zus Zara, die de reis in januari
+                voltooide. Zij is nog wel de jongste vrouwelijke piloot die dat presteerde.
+                """);
+    }
+
     private File getImage(String imageName) {
         try {
             return new File(Objects.requireNonNull(Main.class.getResource(imageName)).toURI());
         } catch (URISyntaxException e) {
             throw new AssertionError("Image: " + imageName + " could not be found");
         }
+    }
+
+    private void shouldDoOCR(BufferedImage toAnalyze, String expected) throws TesseractException {
+        assertThat(TESSERACT_CLIENT.doOCR(toAnalyze)).isEqualTo(expected);
     }
 
     private void shouldDoOCR(File toAnalyze, String expected) throws TesseractException {

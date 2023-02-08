@@ -6,6 +6,7 @@ import net.sourceforge.tess4j.ITesseract;
 import net.sourceforge.tess4j.Tesseract;
 import net.sourceforge.tess4j.TesseractException;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.List;
 import java.util.Objects;
@@ -38,6 +39,10 @@ public class TesseractClient {
             throw new IllegalArgumentException("Default language: " + defaultLanguage + " is not supported. Supported" +
                     " languages are: " + String.join(", ", supportedLanguages));
         }
+    }
+
+    public String doOCR(BufferedImage input) throws TesseractException {
+        return instance.doOCR(input);
     }
 
     public String doOCR(File imageFile) throws TesseractException {
